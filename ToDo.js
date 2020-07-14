@@ -1,5 +1,5 @@
 import React, { component } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -7,36 +7,45 @@ export default class ToDo extends React.Component {
   state = {
     isEditing: false,
     isCompleted: false,
+    toDoValue: '', //2)
   };
   render() {
-    const { isCompleted, isEditing } = this.state; //6)
+    const { isCompleted, isEditing, toDoValue } = this.state; //5)
+    const { text } = this.props; //1-1)
     return (
       <View style={styles.container}>
         <View style={styles.column}>
-          {/* //2) */}
           <TouchableOpacity onPress={this._toggleComplete}>
             <View style={[styles.circle, isCompleted ? styles.completedCircle : styles.uncompletedCircle]} />
           </TouchableOpacity>
-          <Text //1)
-            style={[styles.text, isCompleted ? styles.completedText : styles.uncompletedText]}
-          >
-            Hello Hello Hello Hello Hello
-          </Text>
+          {/* //4) */}
+          {isEditing ? (
+            <TextInput
+              style={[styles.input, styles.text, isCompleted ? styles.completedText : styles.uncompletedText]}
+              value={toDoValue}
+              multiline={true}
+              onChangeText={this._controlInput}
+              returnKeyType={'done'}
+              onBlur={this._finishEditing}
+            /> //5) //6) //7) //8) //10) //11)
+          ) : (
+            <Text style={[styles.text, isCompleted ? styles.completedText : styles.uncompletedText]}>
+              {/* // Hello Hello Hello Hello Hello111 //1) */}
+              {text}
+            </Text>
+          )}
         </View>
-        {isEditing ? ( //4)
+        {isEditing ? (
           <View style={styles.actions}>
             <TouchableOpacity onPressOut={this._finishEditing}>
-              {/* //13) */}
               <View style={styles.actionContainer}>
                 <Text style={styles.actionText}>✔</Text>
               </View>
             </TouchableOpacity>
           </View>
         ) : (
-          //5)
           <View style={styles.actions}>
             <TouchableOpacity onPressOut={this._startEditing}>
-              {/* //12) */}
               <View style={styles.actionContainer}>
                 <Text style={styles.actionText}>✏</Text>
               </View>
@@ -61,16 +70,23 @@ export default class ToDo extends React.Component {
   };
 
   _startEditing = () => {
-    //11)
+    const { text } = this.props; //3)
     this.setState({
       isEditing: true,
+      toDoValue: text, //3)
     });
   };
 
   _finishEditing = () => {
-    //13)
     this.setState({
       isEditing: false,
+    });
+  };
+
+  _controlInput = (text) => {
+    //9)
+    this.setState({
+      toDoValue: text,
     });
   };
 }
@@ -110,42 +126,55 @@ const styles = StyleSheet.create({
     color: '#353535',
   },
   column: {
-    //7)
     flexDirection: 'row',
     alignItems: 'center',
     width: width / 2,
     justifyContent: 'space-between',
   },
   actions: {
-    //9)
     flexDirection: 'row',
   },
   actionContainer: {
-    marginVertical: 10, //10)
+    marginVertical: 10,
     marginHorizontal: 10,
+  },
+  input: {
+    marginVertical: 15,
+    width: width / 2,
   },
 });
 
 /*
-1) 완료 / 미완료 됐을때 텍스트의 스타일도 다르게 줌
-⇒ styles.text를 배열로 만들고
-⇒ 삼항연산자를 사용해서 조건문을 만들어줌
-⇒ 이런식으로 상태 변화를 줘서 state변화를 보여주는 것은, ToDo.js가 아니라 App.js에서 관리 됨(App 컴포넌트에서 ToDo를 렌더링하고, 얘를 로컬 스토리지에 저장할거기 때문)
-2) TouchableOpacity, View를 또다른 View로 묶어줌 + styles.column을 적용해줌
-3) 또다른 View를 만들어줌 (이모티콘 들어갈 영역) - 8)에서 삭제됨
-4) 만약 수정하고 있따면 체크마크가 달린 액션을 보여주고, 아니라면 연필+엑스가 달린 액션을 보여줌(삭제해야 하므로) 
-⇒ 따라서 삼항연산자 안에 View를 만들어서 style로 actions을 주고 
-⇒ 액션 안에 터치 부분을 TouchableOpacity로 만들어주고 
-⇒ 그 안에 다시 텍스트를 만들어서 체크마크를 넣어줌. (이모티콘은 윈도우+마침표)
-5) 수정하지 않을때도 만들어줌
-6) this.state에 isEditing을 넣어줌
-7) 스타일을 작성해줌(column)
-8)  <View style={styles.column}> 삭제해줌(isEditing위에있는거)
-9) 연필모양과 삭제 버튼이 옆으로 위치하게 하기 위해 스타일 작성(actions)
-10) 버튼에 마진을 주는 이유는, 터치시 콕 집어서 클릭하지 않고 항상 약간 위를 클릭하므로(손가락은 두꺼우니까)
+※ App.js에서 value={newTodo}를 관리하고 있음
+- value(newTodo)는 state에 있고, 얘를 input에 넘겨줘서 관리하고 있음 
+⇒ 누군가 편집을 하고 있을 때, 동일한 작업을 해야 함.(왜냐하면 텍스트 인풋을 보여줘야 하므로) 즉, 수정하기를 누르면 리스트가 편집 가능한 input이 되도록 만드는 작업
 
-11) 편집모드 / 수정 안할때 모드 스위칭을 하기 위해 startEditing function을 만들어줌
-12) 연필모양 클릭했을때, startEditing이 실행되게 함
-13) finishEditing도 만들어줌
-⇒ 토글로 안해주는 이유는, 편집을 다 하고 나서 이걸 앱js의 함수에 저장을 해야하기 때문
+1) 이 부분이 텍스트가 아닌, props에서 텍스트를 얻어오면 됨. (어떤값을 컴포넌트에게 전달해줘야 할때 props를 사용)
+⇒ 따라서 1-1)에 비구조화 할당을 통해 text를 props로 받아오게 해줌
+⇒ 그 후에 1)에 {text}를 넣어주고, 
+⇒ App.js에서 ScrollView의 ToDo 부분에 text를 넣어줌 (1-2) - 텍스트를 여기로 패스하는 개념임
+∴ 즉, 누군가 편집을 클릭했을 때, 해당 텍스트를 복사해서 state에 보내는 것
+2) state에 toDoValue를 만들어짐. 처음엔 텅 비어있음. 그러나 누군가 편집을 하기 시작하면 props에서 텍스트를 가져와서 얘를 state에 넣을거임.(3)
+3) 편집하기를 누르면, 텍스트가 지워지고 input박스가 생겨야 함. 따라서, 
+4) 
+  <Text
+  style={[
+    styles.text,
+    isCompleted ? styles.completedText : styles.uncompletedText,
+  ]}
+>
+  Hello Hello Hello Hello Hello111 //1) 
+  {text}
+</Text>
+대신에 삼항연산자로 편집모드에서는 TextInput, 아닐때는 위의 Text가 보이게 해줌
+
+5) value에 toDoValue를 추가해주고, this.state에도 추가해줌
+6) input이라는 style을 적용해줌
+7) textinput이 길어질 수 있으므로, multiline을 활성화해줌
+8) 완료된 후에도 편집할 수 있도록 하기 위해 styles.input을 배열로 만들어서 styles.text도 추가해줌 + Text에 들어간 삼항연산자 복붙해줌
+9) props를 복사해서 state에 넣고있음. 나중에 관리할 수 있도록, 얘를 쉽게 하려면, _controlInput 함수를 만들어서 
+10) onChangeText에 _controlInput을 넣어줌
+⇒ 이렇게 하면 input을 수정할 수 있게 됨
+11) returnKeyType 추가
+12) onBlur일때 _finishEditing추가 : 칸 밖을 클릭하면 편집 종료됨
 */

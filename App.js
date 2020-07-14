@@ -19,8 +19,8 @@ export default class App extends React.Component {
         <View style={styles.card}>
           <TextInput style={styles.input} placeholder={'New To Do'} value={newTodo} onChangeText={this._controlNewToDo} placeholderTextColor={'#999'} returnKeyType={'done'} autoCorrect={false} />
           <ScrollView contentContainerStyle={styles.toDos}>
-            {/* //5) */}
-            <ToDo />
+            {/* //1-2) */}
+            <ToDo text={'hello'} />
           </ScrollView>
         </View>
       </View>
@@ -74,12 +74,6 @@ const styles = StyleSheet.create({
     fontSize: 25,
   },
   toDos: {
-    //4)
     alignItems: 'center',
   },
 });
-
-/*
-4) toDos를 만들어서 가운데 정렬해주고 ⇒ 이걸 해주면 ToDo.js에서 작성한 with -50이 적용됨
-5) ScrollView는 props이 있는데, "contentContainerStyle"임. 얘를 작성해서 앞서 만든 toDos스타일을 적용해줌
-*/
