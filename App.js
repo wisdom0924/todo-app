@@ -1,5 +1,15 @@
 import React from 'react';
-import { StyleSheet, Text, View, StatusBar, TextInput, Dimensions, Platform, ScrollView } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  StatusBar,
+  TextInput,
+  Dimensions,
+  Platform,
+  ScrollView,
+} from 'react-native';
+import { AppLoading } from 'expo'; //4)
 import ToDo from './ToDo';
 
 const { width, height } = Dimensions.get('window');
@@ -7,28 +17,53 @@ const { width, height } = Dimensions.get('window');
 export default class App extends React.Component {
   state = {
     newTodo: '',
+    loadedToDos: false, //2)
   };
 
+  componentDidMount() {
+    this._loadToDos();
+  } //6)
+
   render() {
-    const { newTodo } = this.state;
+    const { newTodo, loadedToDos } = this.state; //3)
+
+    //5)
+    if (!loadedToDos) {
+      return <AppLoading />;
+    }
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" />
 
         <Text style={styles.title}>To Do</Text>
         <View style={styles.card}>
-          <TextInput style={styles.input} placeholder={'New To Do'} value={newTodo} onChangeText={this._controlNewToDo} placeholderTextColor={'#999'} returnKeyType={'done'} autoCorrect={false} />
+          <TextInput
+            style={styles.input}
+            placeholder={'New To Do'}
+            value={newTodo}
+            onChangeText={this._controlNewToDo}
+            placeholderTextColor={'#999'}
+            returnKeyType={'done'}
+            autoCorrect={false}
+          />
           <ScrollView contentContainerStyle={styles.toDos}>
-            {/* //1-2) */}
             <ToDo text={'hello'} />
           </ScrollView>
         </View>
       </View>
     );
   }
+
   _controlNewToDo = (text) => {
     this.setState({
       newTodo: text,
+    });
+  };
+
+  _loadToDos = () => {
+    //7)
+    this.setState({
+      loadedToDos: true,
     });
   };
 }
@@ -77,3 +112,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+/*
+2) 디스크에서 투두를 로딩해야 함. 누군가 투두를 추가할 때마다 얘를 저장해야 하므로 - loadedToDos를 만들어주고, 디폴트로 false를 줌. 
+3) this.state에 넣어주고
+4) expo에서 AppLoading을 import해줌
+5) 만약에 투두가 로딩이 안되어 있다면, AppLoading을 리턴해주고, 로딩되어 있다면 기존의 return내용을 리턴해줌
+⇒ 이렇게하면 로딩화면이 뜸
+6) componentDidMount를 만들어서 로딩이 끝났을때 실행될 아이를 작성해줌. 그 함수를 _loadToDos라고 하고, 7)에 내용을 작성
+7) 로딩이 끝나면 state를 true로 세팅해야 렌더링됨
+8) 
+9) 
+*/
