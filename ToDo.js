@@ -1,83 +1,151 @@
 import React, { component } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native'; //2)
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
 export default class ToDo extends React.Component {
   state = {
-    isEditing: false, //1)
-    isCompleted: false, //8)
+    isEditing: false,
+    isCompleted: false,
   };
   render() {
-    const { isCompleted } = this.state;
+    const { isCompleted, isEditing } = this.state; //6)
     return (
       <View style={styles.container}>
-        <TouchableOpacity onPress={this._toggleComplete}>
-          {/* //6) //10) */}
-          <View style={[styles.circle, isCompleted ? styles.completedCircle : styles.uncompletedCircle]} />
-        </TouchableOpacity>
-        <Text style={styles.text}>Hello Hello Hello Hello Hello</Text>
+        <View style={styles.column}>
+          {/* //2) */}
+          <TouchableOpacity onPress={this._toggleComplete}>
+            <View style={[styles.circle, isCompleted ? styles.completedCircle : styles.uncompletedCircle]} />
+          </TouchableOpacity>
+          <Text //1)
+            style={[styles.text, isCompleted ? styles.completedText : styles.uncompletedText]}
+          >
+            Hello Hello Hello Hello Hello
+          </Text>
+        </View>
+        {isEditing ? ( //4)
+          <View style={styles.actions}>
+            <TouchableOpacity onPressOut={this._finishEditing}>
+              {/* //13) */}
+              <View style={styles.actionContainer}>
+                <Text style={styles.actionText}>✔</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          //5)
+          <View style={styles.actions}>
+            <TouchableOpacity onPressOut={this._startEditing}>
+              {/* //12) */}
+              <View style={styles.actionContainer}>
+                <Text style={styles.actionText}>✏</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <View style={styles.actionContainer}>
+                <Text style={styles.actionText}>❌</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     );
   }
 
   _toggleComplete = () => {
-    //10)
     this.setState((prevState) => {
       return {
-        isCompleted: !prevState.isCompleted, //12)
+        isCompleted: !prevState.isCompleted,
       };
+    });
+  };
+
+  _startEditing = () => {
+    //11)
+    this.setState({
+      isEditing: true,
+    });
+  };
+
+  _finishEditing = () => {
+    //13)
+    this.setState({
+      isEditing: false,
     });
   };
 }
 
 const styles = StyleSheet.create({
   container: {
-    //3)
     width: width - 50,
     borderBottomColor: '#bbb',
     borderBottomWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   circle: {
-    //7)
     width: 30,
     height: 30,
     borderRadius: 15,
     borderWidth: 3,
     marginRight: 20,
   },
-  completedCircle: { borderColor: '#bbb' }, //11-1)
-  uncompletedCircle: { borderColor: '#f23657' }, //11-1)
+  completedCircle: {
+    borderColor: '#bbb',
+  },
+  uncompletedCircle: {
+    borderColor: '#f23657',
+  },
   text: {
-    //7)
     fontWeight: '600',
     fontSize: 20,
     marginVertical: 20,
   },
+  completedText: {
+    color: '#bbb',
+    textDecorationLine: 'line-through',
+  },
+  uncompletedText: {
+    color: '#353535',
+  },
+  column: {
+    //7)
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: width / 2,
+    justifyContent: 'space-between',
+  },
+  actions: {
+    //9)
+    flexDirection: 'row',
+  },
+  actionContainer: {
+    marginVertical: 10, //10)
+    marginHorizontal: 10,
+  },
 });
 
 /*
-1) 투두앱은 두개의 states가 있음. 하나는 수정할 때, 나머지는 수정 안하고 그냥 보여주기만 할 때 : 수정했을때의 state를 작성(isEditing)해주고, 디폴트값을 false로 설정해줌
-2) 리스트를 스타일링 하기 위해, Dimensions를 import해주고 + 화면의 사이즈를 불러오기 위해 작성해줌
-3) 리스트를 스타일링 하기 위해 container를 만들고, View에 적용 
-  ⇒그런데 width값을 줘도 적용이 안됨 (App.js로 가서 ScrollView 스타일링함)
+1) 완료 / 미완료 됐을때 텍스트의 스타일도 다르게 줌
+⇒ styles.text를 배열로 만들고
+⇒ 삼항연산자를 사용해서 조건문을 만들어줌
+⇒ 이런식으로 상태 변화를 줘서 state변화를 보여주는 것은, ToDo.js가 아니라 App.js에서 관리 됨(App 컴포넌트에서 ToDo를 렌더링하고, 얘를 로컬 스토리지에 저장할거기 때문)
+2) TouchableOpacity, View를 또다른 View로 묶어줌 + styles.column을 적용해줌
+3) 또다른 View를 만들어줌 (이모티콘 들어갈 영역) - 8)에서 삭제됨
+4) 만약 수정하고 있따면 체크마크가 달린 액션을 보여주고, 아니라면 연필+엑스가 달린 액션을 보여줌(삭제해야 하므로) 
+⇒ 따라서 삼항연산자 안에 View를 만들어서 style로 actions을 주고 
+⇒ 액션 안에 터치 부분을 TouchableOpacity로 만들어주고 
+⇒ 그 안에 다시 텍스트를 만들어서 체크마크를 넣어줌. (이모티콘은 윈도우+마침표)
+5) 수정하지 않을때도 만들어줌
+6) this.state에 isEditing을 넣어줌
+7) 스타일을 작성해줌(column)
+8)  <View style={styles.column}> 삭제해줌(isEditing위에있는거)
+9) 연필모양과 삭제 버튼이 옆으로 위치하게 하기 위해 스타일 작성(actions)
+10) 버튼에 마진을 주는 이유는, 터치시 콕 집어서 클릭하지 않고 항상 약간 위를 클릭하므로(손가락은 두꺼우니까)
 
-6) 클릭 요소를 TouchableOpacity로 만들어줌
-7) circle과 text를 만들어서 스타일을 작성하고 적용해줌
-8) circle을 클릭하면 완성표시를 만들기 위해, state를 하나 더 작성해줌. isComplete:false
-9) 로직 관리 - 변화를 만들어야 하기 때문임(완성/미완성)
-
-10) TouchableOpacity가 onPress일때 _toggleComplete함수가 실행되도록 함
-- onPress
-: 터치가 해제 될 때 호출되지만 취소 된 경우에는 호출되지 않습니다 (예 : 응답기 잠금을 도용하는 스크롤 등).
-- onPressIn
-: onPress 이전에도 터치 가능한 요소를 누르고 호출하자마자 호출됩니다. 네트워크 요청을 할 때 유용합니다.
-- onPressOut
-: onPress 이전에도 터치가 해제 되 자마자 호출됩니다.
-https://reactnative.dev/docs/touchablewithoutfeedback#onpressin
-
-11) 완성 미완성에 따라 다른 스타일을 만들어줌 . circle에 array생성
-12) setState에 !prevState.isCompleted를 해주면, onPress에 따라 true/false값이 나오면서 스타일이 변하게 됨
+11) 편집모드 / 수정 안할때 모드 스위칭을 하기 위해 startEditing function을 만들어줌
+12) 연필모양 클릭했을때, startEditing이 실행되게 함
+13) finishEditing도 만들어줌
+⇒ 토글로 안해주는 이유는, 편집을 다 하고 나서 이걸 앱js의 함수에 저장을 해야하기 때문
 */
