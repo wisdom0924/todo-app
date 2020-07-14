@@ -1,21 +1,39 @@
 import React from 'react';
-import { StyleSheet, Text, View, StatusBar, TextInput, Dimensions, Platform } from 'react-native'; //1-1) 4) 8)
+import { StyleSheet, Text, View, StatusBar, TextInput, Dimensions, Platform, ScrollView } from 'react-native';
+import ToDo from './ToDo'; //10
+const { width, height } = Dimensions.get('window');
 
-const { width, height } = Dimensions.get('window'); //5)
+export default class App extends React.Component {
+  //1)
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      {/* //1) */}
-      <StatusBar barStyle="light-content" />
-      {/* //2) */}
-      <Text style={styles.title}>To Do</Text>
-      {/* //3) */}
-      <View style={styles.card}>
-        <TextInput style={styles.input} placeholder={'New ToDo'} />
+  state = {
+    //2)
+    newTodo: '',
+  };
+
+  render() {
+    const { newTodo } = this.state; //4)
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" />
+
+        <Text style={styles.title}>To Do</Text>
+        <View style={styles.card}>
+          <TextInput style={styles.input} placeholder={'New To Do'} value={newTodo} onChangeText={this._controlNewToDo} placeholderTextColor={'#999'} returnKeyType={'done'} autoCorrect={false} />
+          <ScrollView>
+            <ToDo />
+          </ScrollView>
+        </View>
       </View>
-    </View>
-  );
+    );
+  }
+
+  _controlNewToDo = (text) => {
+    //3)
+    this.setState({
+      newTodo: text,
+    });
+  };
 }
 
 const styles = StyleSheet.create({
@@ -25,7 +43,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    //2)
     color: 'white',
     fontSize: 30,
     marginTop: 50,
@@ -33,16 +50,14 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   card: {
-    //3)
     backgroundColor: 'white',
     flex: 1,
-    width: width - 25, //4) //6)
+    width: width - 25,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     ...Platform.select({
-      //7) //9)
       ios: {
-        shadowColor: 'rgba(50,50,50)',
+        shadowColor: 'rgba(50,50,50,0.5)',
         shadowOpacity: 0.5,
         shadowRadius: 10,
         shadowOffset: {
@@ -55,29 +70,28 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  input: {
+    padding: 20,
+    borderBottomColor: '#bbb',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    fontSize: 25,
+  },
 });
 
 /*
-1) StatusBar 를 작성해주고, import해줌
-2) 제목을 작성해주고, 스타일링함
-3) todo list가 나오는 곳(card)을 작성해주고 스타일링함
-4) 휴대폰 스크린의 폭만큼 너비를 주기위해 줌 - 이를 위해 react-native의 Dimensions import
-5) window사이즈로 width와 height를 가져오기 위해 작성
-6) width값으로 변수 width에서 25을 빼준 값을 넣어줌. 즉, 이렇게 하면 페이지 전체에서 50을 뺀 값이 됨
-7) shadow를 추가할건데, 얘는 플랫폼마다 약간 다름.(ios/android)
-⇒ 즉. platform-specific code를 해야 함(css에 안드로이드 타겟, ios 타겟 작성해줘야 함)
-⇒ ios에서는 shadowOpacity, shadowColor, shadowOffset, shadowRadius 사용하고
-    안드로이드에서는 elevation: 0~5까지 있음. 사용해야함. 숫자가 커질수록 쉐도우가 커짐
-⇒ 그럼 각각 다른 파일을 만들어야 하나? if condition를 사용해야 하나? : react-native에는 platform이라는게 있음. 얘를 import해줌
+1) 함수형 컴포넌트를 클래스형 컴포넌트로 변경 : input에 텍스트를 넣으면 화면이 변해야 하고, 이를 위해서는 state를 사용해야 함
+2) state를 작성 : 이름은 새로 작성되는 todo이므로 newTodo로 하고, 값은 비어있으니까.
+3) 새로운 function생성. 이건 이벤트에서 텍스트를 가져오므로 this.setState에 newTodo를 작성되는 text로 넣어주면 됨
+4) value값을 넣어줘야 하므로 this.state를 설정해줌
+5) value값과 onChangeText, placeholderTextColor값을 설정해줌
++ 텍스트를 입력할때 아래에 등장하는 키보드를 [done]으로 변경하기 위해 returnKeyType을 설정해줌
+⇒ returnKeyType={'done'}으로 하면, 아이폰에서 화살표가 [완료]버튼으로 나옴
++ 자동수정을 방지하기 위해 autoCorrect={false}로 해줌
 
-8) platform import : platform이 어떤 플랫폼을 사용하는지 확인해줌
-9) 그리고 css에 
-  ...Platform.select({
-      ios: {},
-      android: {},
-  }),
-이렇게 작성해줌 - ios면 해당 버전을 고르고, 안드로이드면 해당 스타일을 골라줌 
-⇒ 플랫폼에 맞는 스타일을 적용할 수 있음
+#todo element를 만들고, todo list를 만들어서 리스트를 스크롤 할 수 있어야 하고, new todo는 상단에 고정되게 스타일링 해줘야 함
+6) 스크롤을 하기 위해 ScrollView 컴포넌트를 만들어줌
++ 이 안에 todo list가 들어가야(렌더링) 되어야 하므로, 루트위치에 새로운 파일을(ToDo.js) 만들어줌
 
-※ 그런데 니꼬의 코드는 클래스 컴포넌튼데 나는 함수형임
+10) ToDo.js를 import해줌
+11) ScrollView에는 ToDo를 렌더링해줌
 */
