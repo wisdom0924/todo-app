@@ -9,7 +9,7 @@ import {
   Platform,
   ScrollView,
   AsyncStorage,
-} from 'react-native'; //2-1)
+} from 'react-native';
 import { AppLoading } from 'expo';
 import ToDo from './ToDo';
 import 'react-native-get-random-values';
@@ -87,16 +87,18 @@ export default class App extends React.Component {
             onSubmitEditing={this._addToDo}
           />
           <ScrollView contentContainerStyle={styles.toDos}>
-            {Object.values(toDos).map((toDo) => (
-              <ToDo
-                key={toDo.id}
-                {...toDo}
-                deleteToDo={this._deleteToDo}
-                uncompleteTodo={this._uncompleteTodo}
-                completeTodo={this._completeTodo}
-                updateTodo={this._updateTodo}
-              />
-            ))}
+            {Object.values(toDos)
+              .reverse()
+              .map((toDo) => (
+                <ToDo
+                  key={toDo.id}
+                  {...toDo}
+                  deleteToDo={this._deleteToDo}
+                  uncompleteTodo={this._uncompleteTodo}
+                  completeTodo={this._completeTodo}
+                  updateTodo={this._updateTodo}
+                />
+              ))}
           </ScrollView>
         </View>
       </View>
@@ -109,10 +111,21 @@ export default class App extends React.Component {
     });
   };
 
-  _loadToDos = () => {
-    this.setState({
-      loadedToDos: true,
-    });
+  _loadToDos = async () => {
+    //1)
+    try {
+      const toDos = await AsyncStorage.getItem('toDos'); //3)
+      const parsedToDos = JSON.parse(toDos); //5-1)
+      console.log(toDos); //4)
+      this.setState({
+        loadedToDos: true,
+        /*toDos, //5)*/
+        toDos: parsedToDos,
+      });
+    } catch (error) {
+      //2)
+      console.log(error);
+    }
   };
 
   _addToDo = () => {
@@ -142,7 +155,7 @@ export default class App extends React.Component {
             ...newToDoObject,
           },
         };
-        this._saveTodos(newState.toDos); //4-1)
+        this._saveTodos(newState.toDos);
         return { ...newState };
       });
     }
@@ -156,7 +169,7 @@ export default class App extends React.Component {
         ...prevState,
         ...toDos,
       };
-      this._saveTodos(newState.toDos); //4-1)
+      this._saveTodos(newState.toDos);
       return { ...newState };
     });
   };
@@ -173,7 +186,7 @@ export default class App extends React.Component {
           },
         },
       };
-      this._saveTodos(newState.toDos); //4-1)
+      this._saveTodos(newState.toDos);
       return { ...newState };
     });
   };
@@ -190,7 +203,7 @@ export default class App extends React.Component {
           },
         },
       };
-      this._saveTodos(newState.toDos); //4-1)
+      this._saveTodos(newState.toDos);
       return { ...newState };
     });
   };
@@ -207,17 +220,12 @@ export default class App extends React.Component {
           },
         },
       };
-      this._saveTodos(newState.toDos); //4)
+      this._saveTodos(newState.toDos);
       return { ...newState };
     });
   };
 
   _saveTodos = (newToDos) => {
-    //console.log(newToDos); //5)
-    // console.log(JSON.stringify(newToDos)); //6)
-    // const saveTodos = AsyncStorage.setItem('toDos', newToDos); //2)
-
-    //8)
     const saveTodos = AsyncStorage.setItem('toDos', JSON.stringify(newToDos));
   };
 }
@@ -268,28 +276,17 @@ const styles = StyleSheet.create({
 });
 
 /*
-#디스크 저장
-#문제는 변경이 많다는 점(텍스트 변경, 완성-미완성(true-false), 추가, 삭제)
-그래서 state에 코드 작성을 많이 해야 함. 같은 함수에 복붙이 많은건 피해야함
-1) _saveTodos함수를 만듦()
-2) AsyncStorage 함수 생성
-2-1) import해줌
-3) 키값을 위한 value를 세팅해줌. setItem(key, value)
-4) _updateTodo에서 newState를 리턴하기 전에 todos를 저장해줌 - 얘를 모든 함수에 복붙(4-1)함
-5) 콘솔 찍어보면 
-  Object {
-    "fdd64f70-c677-11ea-8611-170b06180d02": Object {
-      "createdAt": 1594802925031,
-      "id": "fdd64f70-c677-11ea-8611-170b06180d02",
-      "isCompleted": false,
-      "text": "dddddd",
-    },
-  }
-나오고, [Unhandled promise rejection: cannot be cast to java.lang.String 경고 뜸] 왜냐면 AsyncStorage는 string용인데 우리는 Object를 출력하고 있기 때문임 - 따라서 오브젝트를 string으로 변경해야 함
-6) JSON.stringify는 오브젝트를 string으로 변환시켜줌
-7) 2)을 주석처리하고 콘솔 보면
-  {"3b7ca0e0-c678-11ea-8611-170b06180d02":{"id":"3b7ca0e0-c678-11ea-8611-170b06180d02","isCompleted":false,"text":"ffff","createdAt":1594803028462}}
-  이렇게 string으로 출력
-8) 2)의 newToDos를 6)으로 변경
-9) 
+1) Todo를 로드함. 즉, async함수(로딩이 끝날때까지 기다려야 한다는 의미)
+2) try-catch를 작성하고 콘솔로그로 에러를 출력함
+3) AsyncStorage는 폰 디스크에 작은 variable(key value object같은거를) 저장함. 얘는 많은 function이 있음. setItem, getItem, clearItem 등등등
+4) 콘솔로 state에서 뭘 얻는지 찍어봐~
+
+  {"d16fed50-c678-11ea-920c-0b1610070805":{"id":"d16fed50-c678-11ea-920c-0b1610070805","text":"hello","createdAt":1594803280038,"isCompleted":true},"d4e69d80-c678-11ea-920c-0b1610070805":{"id":"d4e69d80-c678-11ea-920c-0b1610070805","text":"bye","createdAt":1594803285848,"isCompleted":true}}
+  이렇게 string이 출력되는걸 알 수 있음
+
+5) 내가 얻고싶은 투두를 state에 assign할수도 있음 - 디스크에 얻은것을 state에 넣으면 됨
+ - 오류뜨는데, AsyncStorage로 얻은 애는 오브젝트가 아니고 string이지. 
+ - 5-1) 따라서 얘를 다시 오브젝트로 변환해줘야 함 : JSON.parse()사용
+6) 투두 리스트를 추가할때 맨 아래가 아닌 맨 위에 오게 하려면 reverse()추가
+  ⇒여기까지 하면, 리프레시해도 저장된 데이터가 사라지지 않고 남아있게 됨.
 */
