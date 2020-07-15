@@ -34,7 +34,7 @@ export default class ToDo extends React.Component {
             <TextInput
               style={[
                 styles.text,
-                styles.input, //1)
+                styles.input,
                 isCompleted ? styles.completedText : styles.uncompletedText,
               ]}
               value={toDoValue}
@@ -162,8 +162,3 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
   },
 });
-
-/*
-1) 편집하기 위해 클릭시 살짝 사이즈가 변경되는 버그를 잡기 위해, styles.input을 styles.text뒤로 위치를 옮겨줌
-
-*/
