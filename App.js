@@ -90,9 +90,10 @@ export default class App extends React.Component {
               <ToDo
                 key={toDo.id}
                 {...toDo}
-                uncompleteTodo={this._uncompleteTodo} //5)
-                completeTodo={this._completeTodo}
                 deleteToDo={this._deleteToDo}
+                uncompleteTodo={this._uncompleteTodo}
+                completeTodo={this._completeTodo}
+                updateTodo={this._updateTodo} //3)
               />
             ))}
           </ScrollView>
@@ -158,14 +159,12 @@ export default class App extends React.Component {
   };
 
   _uncompleteTodo = (id) => {
-    //1)
     this.setState((prevState) => {
       const newState = {
-        ...prevState, //2)
+        ...prevState,
         toDos: {
           ...prevState.toDos,
           [id]: {
-            //3)
             ...prevState.toDos[id],
             isCompleted: false,
           },
@@ -176,7 +175,6 @@ export default class App extends React.Component {
   };
 
   _completeTodo = (id) => {
-    //4)
     this.setState((prevState) => {
       const newState = {
         ...prevState,
@@ -185,6 +183,22 @@ export default class App extends React.Component {
           [id]: {
             ...prevState.toDos[id],
             isCompleted: true,
+          },
+        },
+      };
+      return { ...newState };
+    });
+  };
+
+  _updateTodo = (id, text) => {
+    this.setState((prevState) => {
+      const newState = {
+        ...prevState,
+        toDos: {
+          ...prevState.toDos,
+          [id]: {
+            ...prevState.toDos[id],
+            text: text,
           },
         },
       };
@@ -239,10 +253,8 @@ const styles = StyleSheet.create({
 });
 
 /*
-#할일목록 완성, 미완성 작업
-1) 미완성 함수 만들고 
-2) ...prevState에서 이전 state를 전달해주고 
-3) 보내줄 id를 추가해줌. 즉, 이전todos를 덮어쓰면서 만약 해당 id를 가지고 있는 새로운게 있다면 덮어쓰게 함
-4) 완성 함수도 만들어줌
-5) _uncompleteTodo, _completeTodo는 투두 컴포넌트의 새로운 함수가 됨 : 얘네들을 디스크에 저장할건데 App.js는 저장되지만 ToDo.js는 저장 안됨.
+# 투두 업데이트(텍스트 수정)
+1) _updateTodo를 만들고 이전과 거의 같지만, arg로 text도 전달해야 함
+2) isComplete대신에 text가 들어가면 되는데, 이때 text의 값이 newTodo가 아니라 text가 들어감
+3) ToDo 컴포넌트에 _updateTodo함수를 연결해줌
 */
