@@ -22,13 +22,15 @@ export default class ToDo extends React.Component {
   static propTypes = {
     text: PropTypes.string.isRequired,
     isCompleted: PropTypes.bool.isRequired,
-    deleteToDo: PropTypes.func.isRequired, //18)
-    id: PropTypes.string.isRequired, //21)
+    deleteToDo: PropTypes.func.isRequired,
+    id: PropTypes.string.isRequired,
+    uncompleteTodo: PropTypes.func.isRequired,
+    completeTodo: PropTypes.func.isRequired,
   };
 
   render() {
-    const { isCompleted, isEditing, toDoValue } = this.state;
-    const { text, id, deleteToDo } = this.props; //20) //22)
+    const { isEditing, toDoValue } = this.state; //7-3)
+    const { text, id, deleteToDo, isCompleted } = this.props; //7-4)
     return (
       <View style={styles.container}>
         <View style={styles.column}>
@@ -80,7 +82,6 @@ export default class ToDo extends React.Component {
               </View>
             </TouchableOpacity>
             <TouchableOpacity onPressOut={() => deleteToDo(id)}>
-              {/* //19) */}
               <View style={styles.actionContainer}>
                 <Text style={styles.actionText}>❌</Text>
               </View>
@@ -92,11 +93,20 @@ export default class ToDo extends React.Component {
   }
 
   _toggleComplete = () => {
-    this.setState((prevState) => {
-      return {
-        isCompleted: !prevState.isCompleted,
-      };
-    });
+    // this.setState((prevState) => {
+    //   return {
+    //     isCompleted: !prevState.isCompleted,
+    //   };
+    // });
+    const { isCompleted, uncompleteTodo, completeTodo, id } = this.props; //7-1)
+
+    if (isCompleted) {
+      uncompleteTodo(id);
+      console.log(`isCompleted un, ${isCompleted}, ${id}`);
+    } else {
+      completeTodo(id);
+      console.log(`isCompleted com, ${isCompleted}, ${id}`);
+    }
   };
 
   _startEditing = () => {
@@ -172,9 +182,11 @@ const styles = StyleSheet.create({
 });
 
 /*
-                18) toDos는 새로운 prop이 있음. function추가해줌
-                19) x버튼에 onPressOut을 설정해서 버튼 클릭시 delete가 실행되도록 함
-                20) this.props에 id넣어주고
-                21) propTypes에도 id를 넣어줌
-                22) this.props에 delete넣어줌
-                */
+6) uncompleteTodo, completeTodo의 proptype을 작성함
+7) 완성, 미완성을 컨트롤 하는 토글함수를 확인(_toggleComplete)
+  7-1) props에 isCompleted, uncompleteTodo, completeTodo, id을 넣어주고
+  7-2) isCompleted 에따라 uncom-com id값 주도록 설정함 
+  ⇒ 이렇게 하면 차이점은 isCompleted를 state에서 하는 대신에, props에서 보고 처리하게 되는 거. 따라서 7-3)에 있던 isCompleted를 7-4)로 옮겨줌
+⇒ 에뮬레이터에서 확인하면, 리스트의 완성 미완성 표시가 잘 됨
+∴ 이제 props에서 관리되므로 즉, App.js에서 작업이 되고 있다는 거
+*/

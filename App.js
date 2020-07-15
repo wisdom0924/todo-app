@@ -86,11 +86,15 @@ export default class App extends React.Component {
             onSubmitEditing={this._addToDo}
           />
           <ScrollView contentContainerStyle={styles.toDos}>
-            {Object.values(toDos).map(
-              (toDo) => (
-                <ToDo key={toDo.id} {...toDo} deleteToDo={this._deleteToDo} />
-              ), //17)
-            )}
+            {Object.values(toDos).map((toDo) => (
+              <ToDo
+                key={toDo.id}
+                {...toDo}
+                uncompleteTodo={this._uncompleteTodo} //5)
+                completeTodo={this._completeTodo}
+                deleteToDo={this._deleteToDo}
+              />
+            ))}
           </ScrollView>
         </View>
       </View>
@@ -140,15 +144,49 @@ export default class App extends React.Component {
       });
     }
   };
-  //13)
+
   _deleteToDo = (id) => {
-    //14)
     this.setState((prevState) => {
-      const toDos = prevState.toDos; //15)
-      delete toDos[id]; //16)
+      const toDos = prevState.toDos;
+      delete toDos[id];
       const newState = {
         ...prevState,
         ...toDos,
+      };
+      return { ...newState };
+    });
+  };
+
+  _uncompleteTodo = (id) => {
+    //1)
+    this.setState((prevState) => {
+      const newState = {
+        ...prevState, //2)
+        toDos: {
+          ...prevState.toDos,
+          [id]: {
+            //3)
+            ...prevState.toDos[id],
+            isCompleted: false,
+          },
+        },
+      };
+      return { ...newState };
+    });
+  };
+
+  _completeTodo = (id) => {
+    //4)
+    this.setState((prevState) => {
+      const newState = {
+        ...prevState,
+        toDos: {
+          ...prevState.toDos,
+          [id]: {
+            ...prevState.toDos[id],
+            isCompleted: true,
+          },
+        },
       };
       return { ...newState };
     });
@@ -199,3 +237,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+/*
+#할일목록 완성, 미완성 작업
+1) 미완성 함수 만들고 
+2) ...prevState에서 이전 state를 전달해주고 
+3) 보내줄 id를 추가해줌. 즉, 이전todos를 덮어쓰면서 만약 해당 id를 가지고 있는 새로운게 있다면 덮어쓰게 함
+4) 완성 함수도 만들어줌
+5) _uncompleteTodo, _completeTodo는 투두 컴포넌트의 새로운 함수가 됨 : 얘네들을 디스크에 저장할건데 App.js는 저장되지만 ToDo.js는 저장 안됨.
+*/
