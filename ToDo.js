@@ -26,7 +26,7 @@ export default class ToDo extends React.Component {
     id: PropTypes.string.isRequired,
     uncompleteTodo: PropTypes.func.isRequired,
     completeTodo: PropTypes.func.isRequired,
-    updateTodo: PropTypes.func.isRequired, //6)
+    updateTodo: PropTypes.func.isRequired,
   };
 
   render() {
@@ -109,9 +109,9 @@ export default class ToDo extends React.Component {
   };
 
   _finishEditing = () => {
-    const { toDoValue } = this.state; //4)
-    const { id, updateTodo } = this.props; //5)
-    updateTodo(id, toDoValue); //7)
+    const { toDoValue } = this.state;
+    const { id, updateTodo } = this.props;
+    updateTodo(id, toDoValue);
     this.setState({
       isEditing: false,
     });
@@ -178,9 +178,5 @@ const styles = StyleSheet.create({
 });
 
 /*
-4) _finishEditing에서 편집하는 텍스트를 가져와야 함. 
-5) 특정 리스트를 텍스트 업데이트 하기 위해 id값과 updateTodo를 props에 넣어줌
-6) proptypes 작성
-7) updateTodo를 작성
-⇒ 여기까지 하면, 수정텍스트가 잘 반영됨
+
 */

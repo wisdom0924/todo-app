@@ -8,7 +8,8 @@ import {
   Dimensions,
   Platform,
   ScrollView,
-} from 'react-native';
+  AsyncStorage,
+} from 'react-native'; //2-1)
 import { AppLoading } from 'expo';
 import ToDo from './ToDo';
 import 'react-native-get-random-values';
@@ -93,7 +94,7 @@ export default class App extends React.Component {
                 deleteToDo={this._deleteToDo}
                 uncompleteTodo={this._uncompleteTodo}
                 completeTodo={this._completeTodo}
-                updateTodo={this._updateTodo} //3)
+                updateTodo={this._updateTodo}
               />
             ))}
           </ScrollView>
@@ -141,6 +142,7 @@ export default class App extends React.Component {
             ...newToDoObject,
           },
         };
+        this._saveTodos(newState.toDos); //4-1)
         return { ...newState };
       });
     }
@@ -154,6 +156,7 @@ export default class App extends React.Component {
         ...prevState,
         ...toDos,
       };
+      this._saveTodos(newState.toDos); //4-1)
       return { ...newState };
     });
   };
@@ -170,6 +173,7 @@ export default class App extends React.Component {
           },
         },
       };
+      this._saveTodos(newState.toDos); //4-1)
       return { ...newState };
     });
   };
@@ -186,6 +190,7 @@ export default class App extends React.Component {
           },
         },
       };
+      this._saveTodos(newState.toDos); //4-1)
       return { ...newState };
     });
   };
@@ -202,8 +207,18 @@ export default class App extends React.Component {
           },
         },
       };
+      this._saveTodos(newState.toDos); //4)
       return { ...newState };
     });
+  };
+
+  _saveTodos = (newToDos) => {
+    //console.log(newToDos); //5)
+    // console.log(JSON.stringify(newToDos)); //6)
+    // const saveTodos = AsyncStorage.setItem('toDos', newToDos); //2)
+
+    //8)
+    const saveTodos = AsyncStorage.setItem('toDos', JSON.stringify(newToDos));
   };
 }
 
@@ -253,8 +268,28 @@ const styles = StyleSheet.create({
 });
 
 /*
-# 투두 업데이트(텍스트 수정)
-1) _updateTodo를 만들고 이전과 거의 같지만, arg로 text도 전달해야 함
-2) isComplete대신에 text가 들어가면 되는데, 이때 text의 값이 newTodo가 아니라 text가 들어감
-3) ToDo 컴포넌트에 _updateTodo함수를 연결해줌
+#디스크 저장
+#문제는 변경이 많다는 점(텍스트 변경, 완성-미완성(true-false), 추가, 삭제)
+그래서 state에 코드 작성을 많이 해야 함. 같은 함수에 복붙이 많은건 피해야함
+1) _saveTodos함수를 만듦()
+2) AsyncStorage 함수 생성
+2-1) import해줌
+3) 키값을 위한 value를 세팅해줌. setItem(key, value)
+4) _updateTodo에서 newState를 리턴하기 전에 todos를 저장해줌 - 얘를 모든 함수에 복붙(4-1)함
+5) 콘솔 찍어보면 
+  Object {
+    "fdd64f70-c677-11ea-8611-170b06180d02": Object {
+      "createdAt": 1594802925031,
+      "id": "fdd64f70-c677-11ea-8611-170b06180d02",
+      "isCompleted": false,
+      "text": "dddddd",
+    },
+  }
+나오고, [Unhandled promise rejection: cannot be cast to java.lang.String 경고 뜸] 왜냐면 AsyncStorage는 string용인데 우리는 Object를 출력하고 있기 때문임 - 따라서 오브젝트를 string으로 변경해야 함
+6) JSON.stringify는 오브젝트를 string으로 변환시켜줌
+7) 2)을 주석처리하고 콘솔 보면
+  {"3b7ca0e0-c678-11ea-8611-170b06180d02":{"id":"3b7ca0e0-c678-11ea-8611-170b06180d02","isCompleted":false,"text":"ffff","createdAt":1594803028462}}
+  이렇게 string으로 출력
+8) 2)의 newToDos를 6)으로 변경
+9) 
 */
