@@ -82,7 +82,12 @@ export default class ToDo extends React.Component {
                 <Text style={styles.actionText}>✏</Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPressOut={() => deleteToDo(id)}>
+            <TouchableOpacity
+              onPressOut={(event) => {
+                event.stopPropagation; //2)
+                deleteToDo(id);
+              }}
+            >
               <View style={styles.actionContainer}>
                 <Text style={styles.actionText}>❌</Text>
               </View>
@@ -93,7 +98,9 @@ export default class ToDo extends React.Component {
     );
   }
 
-  _toggleComplete = () => {
+  _toggleComplete = (event) => {
+    //1)
+    event.stopPropagation(); //2)
     const { isCompleted, uncompleteTodo, completeTodo, id } = this.props;
     if (isCompleted) {
       uncompleteTodo(id);
@@ -102,13 +109,17 @@ export default class ToDo extends React.Component {
     }
   };
 
-  _startEditing = () => {
+  _startEditing = (event) => {
+    //1)
+    event.stopPropagation(); //2)
     this.setState({
       isEditing: true,
     });
   };
 
-  _finishEditing = () => {
+  _finishEditing = (event) => {
+    //1)
+    event.stopPropagation(); //2)
     const { toDoValue } = this.state;
     const { id, updateTodo } = this.props;
     updateTodo(id, toDoValue);
@@ -178,5 +189,16 @@ const styles = StyleSheet.create({
 });
 
 /*
+#에러 고치기
+- 폰에서 뭔가를 클릭하면 리스트가 흔들림(스크롤되는거처럼)
+- 이를 고치기 위해서는 이벤트를 부르고 컴포넌트에 이벤트를 주는거로 해결
+- 이벤트에 연결된게 있는데, 여기서는 버튼들이고 두번째는 스크롤 뷰임 : 얘네들을 할때마다 이벤트는 전파됨(여기서는 ToDo.js의 TouchableOpacity에 있는거가 스크롤뷰에 전파된거임)
+- 이를 해결하기 위해 TouchableOpacity에 연결된 모든 함수에 event stop을 걸어줌
+1) event를 받아와서 
+2) stopPropagation을 줌
 
+#splash 스크린 변경
+step1) app.json에서 backgroundColor색상을 #f23657로 변경해줌
+step2) 이미지파일 두개 만들어서 [splash.png, icon.png] assets폴더에 넣어줌
+  ⇒ 이렇게 하면, 앱 아이콘이랑 스크린 화면 변경됨
 */

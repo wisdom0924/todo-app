@@ -88,7 +88,7 @@ export default class App extends React.Component {
           />
           <ScrollView contentContainerStyle={styles.toDos}>
             {Object.values(toDos)
-              .reverse()
+              .reverse() //6)
               .map((toDo) => (
                 <ToDo
                   key={toDo.id}
@@ -274,19 +274,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
-/*
-1) Todo를 로드함. 즉, async함수(로딩이 끝날때까지 기다려야 한다는 의미)
-2) try-catch를 작성하고 콘솔로그로 에러를 출력함
-3) AsyncStorage는 폰 디스크에 작은 variable(key value object같은거를) 저장함. 얘는 많은 function이 있음. setItem, getItem, clearItem 등등등
-4) 콘솔로 state에서 뭘 얻는지 찍어봐~
-
-  {"d16fed50-c678-11ea-920c-0b1610070805":{"id":"d16fed50-c678-11ea-920c-0b1610070805","text":"hello","createdAt":1594803280038,"isCompleted":true},"d4e69d80-c678-11ea-920c-0b1610070805":{"id":"d4e69d80-c678-11ea-920c-0b1610070805","text":"bye","createdAt":1594803285848,"isCompleted":true}}
-  이렇게 string이 출력되는걸 알 수 있음
-
-5) 내가 얻고싶은 투두를 state에 assign할수도 있음 - 디스크에 얻은것을 state에 넣으면 됨
- - 오류뜨는데, AsyncStorage로 얻은 애는 오브젝트가 아니고 string이지. 
- - 5-1) 따라서 얘를 다시 오브젝트로 변환해줘야 함 : JSON.parse()사용
-6) 투두 리스트를 추가할때 맨 아래가 아닌 맨 위에 오게 하려면 reverse()추가
-  ⇒여기까지 하면, 리프레시해도 저장된 데이터가 사라지지 않고 남아있게 됨.
-*/
