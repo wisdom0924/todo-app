@@ -85,10 +85,17 @@ export default class App extends React.Component {
             returnKeyType={'done'}
             autoCorrect={false}
             onSubmitEditing={this._addToDo}
+            underlineColorAndroid={'transparent'} //3)
           />
           <ScrollView contentContainerStyle={styles.toDos}>
             {Object.values(toDos)
-              .reverse() //6)
+              .sort(function (a, b) {
+                //1)
+                if (a.hasOwnProperty('createdAt')) {
+                  return a.createdAt - b.createdAt;
+                }
+              })
+              .reverse()
               .map((toDo) => (
                 <ToDo
                   key={toDo.id}
@@ -112,18 +119,15 @@ export default class App extends React.Component {
   };
 
   _loadToDos = async () => {
-    //1)
     try {
-      const toDos = await AsyncStorage.getItem('toDos'); //3)
-      const parsedToDos = JSON.parse(toDos); //5-1)
-      console.log(toDos); //4)
+      const toDos = await AsyncStorage.getItem('toDos');
+      const parsedToDos = JSON.parse(toDos);
+      console.log(toDos);
       this.setState({
         loadedToDos: true,
-        /*toDos, //5)*/
-        toDos: parsedToDos,
+        toDos: parsedToDos || {}, //2)
       });
     } catch (error) {
-      //2)
       console.log(error);
     }
   };
@@ -274,3 +278,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+/*
+1) 완성/미완성 토글시 리스트 순서가 바뀌는 부분 해결하기 위해 sort함수 추가함
+2) 앱에서 뜨는 경고 Object.values 관련 에러가 있는데 앱이 처음 열릴 때 todo를 찾을 수 없기 때문임(즉, todo를 null로 보고 있기 때문)
+⇒ null은 object가 아니므로 parse를 할 수 없게 됨
+⇒ 따라서 빈객체를 넣어서, 나중에 투두를 다 삭제하거나 리스트가 없이 시작할때, toDos가 빈 객체가 되도록 함
+3) 안드로이드에서 TextInput을 클릭하면 밑줄생기는거 없애기 + ToDo.js의 TextInput에도 동일하게 적용해줌
+
+# 이렇게 수정했는데, 수정 전에 build했어~ 만약에 이 상태로 앱 실행하면 얼어버림
+엑스포의 작점은 코드를 빌드할때 apk위에 하지 않음. 빌드한 건 엑스포 클라이언트임. 이 때문에 열릴때마다 최신버전의 코드를 다운로드 할 수 있음
+이 방법으로 apk, ios 앱스토어를 업데이트하는거임
+이 때문에 다시 업데이트하고, 승인요청할 필요가 없어짐
+
+수정했으므로, 엑스포 dev tool에서 Publish or republish project눌러주면 수정이 반영되어 최신 상태를 업데이트함
+4) 
+5)
+
+ */
