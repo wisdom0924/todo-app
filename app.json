@@ -8,7 +8,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#f23657"
+      "backgroundColor": "#94BFCA"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -25,6 +25,7 @@
     "android": {
       "package": "co.sk.todo"
     },
-    "description": ""
+    "description": "",
+    "githubUrl": "https://github.com/wisdom0924/todo-app"
   }
 }
