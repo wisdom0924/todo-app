@@ -90,7 +90,10 @@ export default class ToDo extends React.Component {
               }}
             >
               <View style={styles.actionContainer}>
-                <Text style={styles.actionText}>❌</Text>
+                {/* <Text style={styles.actionText}>❌</Text> */}
+                <Text style={{ ...styles.actionText, ...styles.deleteText }}>
+                  X
+                </Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -143,17 +146,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   circle: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     borderWidth: 3,
-    marginRight: 20,
+    marginRight: 16,
+    marginLeft: 5,
   },
   completedCircle: {
-    borderColor: '#bbb',
+    borderColor: '#CADEE3',
   },
   uncompletedCircle: {
-    borderColor: '#f23657',
+    borderColor: '#3E6B79',
   },
   text: {
     fontWeight: '600',
@@ -183,5 +187,12 @@ const styles = StyleSheet.create({
     width: width / 2,
     marginVertical: 15,
     paddingBottom: 5,
+  },
+  deleteText: {
+    color: '#4E8092',
+    fontSize: 20,
+    paddingLeft: 5,
+    paddingRight: 5,
+    fontWeight: '800',
   },
 });
